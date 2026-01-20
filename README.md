@@ -12,8 +12,8 @@ Starting with modest hardware to focus on software optimization and resource man
 
 | Component | Specification |
 | :--- | :--- |
-| **Model** | Custom Desktop Build |
-| **CPU** | Intel Core i5 (3rd Gen) |
+| **Model** | HP Compaq Elite 8300 SFF case |
+| **CPU** | Intel Core i5 3470 |
 | **RAM** | 4GB DDR3 |
 | **Storage** | 256GB SSD |
 | **OS** | Ubuntu Server 22.04 LTS |
