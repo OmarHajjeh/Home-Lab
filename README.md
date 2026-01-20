@@ -45,7 +45,6 @@ Current containers running in the production environment:
 | **WhoAmI** | Utility | A tiny Go webserver for testing network routing. |
 
 ## 🚀 Future Roadmap
-* [ ] Migrate to a "Flat Network" topology.
 * [ ] Implement high availability for DNS (Secondary AdGuard).
 * [ ] Automate backups using Duplicati.
 * [ ] Implement local https.
