@@ -1,0 +1,13 @@
+version: "3.3"
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    environment:                                    # <--- ADD THIS
+      - HOMEPAGE_ALLOWED_HOSTS=home.lab,192.168.2.2 # <--- ADD THIS
+    ports:
+      - 3001:3000
+    volumes:
+      - ./config:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
