@@ -40,15 +40,17 @@ Current containers running in the production environment:
 | **AdGuard Home** | Network | Network-wide ad blocking and local DNS resolution. |
 | **Nginx Proxy Manager** | Network | Reverse proxy to route traffic to containers. |
 | **Portainer** | Management | Web UI for managing Docker containers and stacks. |
+| **ZeroByte** | Maintenance | Modern Web UI for Restic to manage automated, encrypted backups. |
 | **Homepage** | Dashboard | A modern, static dashboard to view all services at a glance. |
 | **Uptime Kuma** | Monitoring | Self-hosted monitoring tool for service uptime. |
 | **WhoAmI** | Utility | A tiny Go webserver for testing network routing. |
 
 ## 🚀 Future Roadmap
 * [ ] Implement high availability for DNS (Secondary AdGuard).
-* [ ] Automate backups using Zerobyte.
 * [ ] Make this setup suitable for production environments.
 * [ ] Try to deploy this exact home lab setup in the cloud.
+* [ ] Try tis exact setup on latest Debian version
+* [ ] Search for better alternative of these services
 
 ---
 *Created by Omar | 2026*
