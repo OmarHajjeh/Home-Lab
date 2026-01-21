@@ -10,8 +10,7 @@ First create a tailscale account on https://tailscale.com/ and install the tails
 
 Then run the following on the Ubuntu Server:
 ```bash
-curl -fsSL [https://tailscale.com/install.sh](https://tailscale.com/install.sh) | sh
-
+curl -fsSL https://tailscale.com/install.sh | sh
 ```
 
 ### 1.2 Configuration
