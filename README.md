@@ -46,8 +46,7 @@ Current containers running in the production environment:
 
 ## 🚀 Future Roadmap
 * [ ] Implement high availability for DNS (Secondary AdGuard).
-* [ ] Automate backups using Duplicati.
-* [ ] Implement local https.
+* [ ] Automate backups using Zerobyte.
 * [ ] Make this setup suitable for production environments.
 * [ ] Try to deploy this exact home lab setup in the cloud.
 
