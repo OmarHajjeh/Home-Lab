@@ -47,7 +47,7 @@ sudo mkdir -p /usr/src/rtl8851bu-1.0
 
 # 2. Copy the source files there
 sudo cp -r . /usr/src/rtl8851bu-1.0
-
+https://uptime.lab/dashboard
 # 3. Add, build, and install via DKMS
 sudo dkms add -m rtl8851bu -v 1.0
 sudo dkms build -m rtl8851bu -v 1.0
@@ -62,7 +62,7 @@ Now, every time you get a new kernel, Ubuntu will attempt to rebuild this for yo
 
 #### Step 5: The "Auto-Fix & Health Check" Script
 
-As a Computer Engineering student, you'll find this script useful for your home lab. It checks if the interface is up; if not, it checks if the module exists, and if that fails, it re-compiles the driver.
+It checks if the interface is up; if not, it checks if the module exists, and if that fails, it re-compiles the driver.
 
 **Create the script:**
 `nano ~/check_wifi.sh`
