@@ -22,6 +22,44 @@ curl -fsSL https://tailscale.com/install.sh | sh
 * **DNS Settings:** Add the server's **Tailscale IP** (`100.x.y.z`) as a Global Nameserver.
 * **Override Local DNS:** Enable this to force clients to use our AdGuard instance.
 
+### 1.3 Remote Access (Tailscale Subnet Router)
+
+This configuration enables **Site-to-Site** style access. It allows remote devices (laptop at work/travel) to access the Home Lab using local IP addresses (e.g., `192.168.1.10`) and local domain names (`*.lab`) via the encrypted Tailscale tunnel.
+
+Without this, remote devices can only access the server via its 100.x.y.z Tailscale IP.
+
+#### a. The Concept
+By enabling **Subnet Routes**, the Home Server acts as a gateway. It advertises the entire home network (`192.168.1.0/24`) to the Tailscale mesh. When a remote laptop requests `192.168.1.10`, Tailscale intercepts the packet, encrypts it, sends it to the Home Server, and the Home Server forwards it to the local LAN.
+
+#### b. Server Configuration (CLI)
+Run the following command on the Home Server (Ubuntu) to start advertising the local subnet to the Tailscale network.
+
+```bash
+# --advertise-routes: Tells Tailscale to share the 192.168.1.x network
+# --reset: Ensures previous settings are overwritten with this new config
+sudo tailscale up --advertise-routes=192.168.1.0/24 --reset
+```
+
+#### c. Approval (Web Console)
+
+For security reasons, routes are not enabled automatically. You must explicitly approve them in the admin panel.
+
+1. Log in to the **[Tailscale Admin Console](https://login.tailscale.com/admin/machines)**.
+2. Locate the **Home Server** in the machines list.
+3. Look for a **"Subnets"** badge (it may be gray with an `!` icon).
+4. Click the **Three Dots (...)** menu on the right side of the machine row.
+5. Select **Edit Route Settings**.
+6. **Check the box** next to `192.168.1.0/24`.
+7. Click **Save**.
+
+#### d. Verification
+
+From a remote network (e.g., Office Wi-Fi or Mobile Data):
+
+1. Open a terminal.
+2. Ping the local server IP: `ping 192.168.1.10`.
+3. If it replies, the bridge is active, and `*.lab` domains will now resolve correctly.
+
 
 
 ## 2. DNS Resolution (AdGuard Home)
@@ -76,20 +114,7 @@ For every service (e.g., Portainer, Homepage), a **Proxy Host** is created in NP
 To fix CSRF/Origin errors when accessing Portainer via domain, add this to the **Advanced** tab of the Proxy Host:
 
 ```nginx
-location / {
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "upgrade";
-    proxy_ssl_verify off;
-    proxy_ssl_server_name on;
-    
-    # Spoof Host and Origin to match internal IP
-    proxy_set_header Host "192.168.1.x";
-    proxy_set_header Origin "[https://192.168.1.](https://192.168.1.)x:9443";
-    
-    proxy_pass [https://192.168.1.](https://192.168.1.)x:9443;
-}
-
+# Simple SSL Bypass for viewing
+proxy_ssl_verify off;
+proxy_ssl_server_name on;
 ```
-
-*(Replace `192.168.1.x` with the actual server IP).*
