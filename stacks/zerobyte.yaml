@@ -11,6 +11,9 @@ services:
       - /dev/fuse:/dev/fuse
     environment:
       - TZ=Asia/Beirut
+      - APP_SECRET=your_generated_secret_here
+      - BASE_URL=http://192.168.1.10:4096
+
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/lib/zerobyte:/var/lib/zerobyte
