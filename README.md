@@ -27,7 +27,7 @@ The core infrastructure is containerized using Docker, managed via Komodo for Gi
 * **Reverse Proxy:** Traefik (automatic routing via Docker labels)
 * **DNS:** Technitium DNS Server (local DNS resolver with web UI)
 
-## �� Network Architecture
+##  Network Architecture
 The lab allows for secure remote access without opening ports on the home router.
 * **External Access:** Handled via **Tailscale** Subnet Routing.
 * **Internal Routing:** **Traefik** handles TLS termination and domain routing (e.g., `*.lab`) using Docker label-based auto-discovery.
