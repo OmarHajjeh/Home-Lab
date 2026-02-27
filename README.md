@@ -19,38 +19,128 @@ Starting with modest hardware to focus on software optimization and resource man
 | **OS** | Ubuntu Server 22.04 LTS |
 
 ## 🛠️ Software Stack
-The core infrastructure is containerized using Docker, managed via Portainer for ease of orchestration.
+The core infrastructure is containerized using Docker, managed via Komodo for Git-sync deployments.
 
 * **Container Engine:** Docker CE
-* **Orchestration:** Portainer
+* **Container Management:** Komodo (Git-sync deployments to `/srv`)
 * **Remote Access:** Tailscale (Mesh VPN)
-* **Reverse Proxy:** Nginx Proxy Manager
+* **Reverse Proxy:** Traefik (automatic routing via Docker labels)
+* **DNS:** Technitium DNS Server (local DNS resolver with web UI)
 
-## 🌐 Network Architecture
+## �� Network Architecture
 The lab allows for secure remote access without opening ports on the home router.
 * **External Access:** Handled via **Tailscale** Subnet Routing.
-* **Internal Routing:** **Nginx Proxy Manager** handles SSL termination and domain routing (e.g., `*.lab`).
-* **DNS:** **AdGuard Home** serves as the local DNS resolver, handling rewrite rules for internal domains.
+* **Internal Routing:** **Traefik** handles TLS termination and domain routing (e.g., `*.lab`) using Docker label-based auto-discovery.
+* **DNS:** **Technitium DNS Server** serves as the local DNS resolver, handling wildcard rewrite rules for internal domains.
 
 ## 📦 Deployed Services
 Current containers running in the production environment:
 
 | Service | Type | Description |
 | :--- | :--- | :--- |
-| **AdGuard Home** | Network | Network-wide ad blocking and local DNS resolution. |
-| **Nginx Proxy Manager** | Network | Reverse proxy to route traffic to containers. |
-| **Portainer** | Management | Web UI for managing Docker containers and stacks. |
-| **ZeroByte** | Maintenance | Modern Web UI for Restic to manage automated, encrypted backups. |
+| **Technitium DNS** | Network | Local DNS resolver with a modern web UI. |
+| **Traefik** | Network | Reverse proxy with automatic HTTPS and Docker-native routing. |
+| **Komodo** | Management | Git-sync container management with web UI. |
 | **Homepage** | Dashboard | A modern, static dashboard to view all services at a glance. |
 | **Uptime Kuma** | Monitoring | Self-hosted monitoring tool for service uptime. |
 | **WhoAmI** | Utility | A tiny Go webserver for testing network routing. |
 
-## 🚀 Future Roadmap
-* [ ] Implement high availability for DNS (Secondary AdGuard).
-* [ ] Make this setup suitable for production environments.
-* [ ] Try to deploy this exact home lab setup in the cloud.
-* [ ] Try tis exact setup on latest Debian version
-* [ ] Search for better alternative of these services
+## 📁 Repository Structure
+
+```
+Home-Lab/
+├── README.md
+├── .gitignore
+├── docs/
+│   ├── 01-installation.md
+│   ├── 02-networking.md
+│   ├── 03-security.md
+│   ├── 04-wifi-adapter.md
+│   └── 05-backup.md
+├── infrastructure/
+│   ├── traefik/
+│   │   ├── compose.yaml
+│   │   ├── .env.example
+│   │   └── config/
+│   │       ├── traefik.yaml
+│   │       ├── certs.yaml
+│   │       └── dynamic/
+│   │           └── middlewares.yaml
+│   ├── technitium/
+│   │   ├── compose.yaml
+│   │   └── .env.example
+│   └── komodo/
+│       ├── compose.yaml
+│       └── .env.example
+├── apps/
+│   ├── homepage/
+│   │   ├── compose.yaml
+│   │   └── .env.example
+│   ├── uptime-kuma/
+│   │   ├── compose.yaml
+│   │   └── .env.example
+│   └── whoami/
+│       ├── compose.yaml
+│       └── .env.example
+└── scripts/
+    ├── setup-host.sh
+    ├── generate-certs.sh
+    └── check-wifi.sh
+```
+
+## 🚀 Quick Start
+
+### 1. Prepare the host
+```bash
+bash scripts/setup-host.sh
+```
+
+### 2. Generate SSL certificates
+```bash
+bash scripts/generate-certs.sh
+```
+
+### 3. Deploy infrastructure (Traefik, Technitium, Komodo)
+```bash
+# Traefik
+cd infrastructure/traefik
+cp .env.example .env
+cp ~/certs/star_lab.crt ./certs/
+cp ~/certs/star_lab.key ./certs/
+docker compose up -d
+
+# Technitium DNS
+cd ../technitium
+cp .env.example .env && nano .env
+docker compose up -d
+
+# Komodo
+cd ../komodo
+cp .env.example .env && nano .env
+docker compose up -d
+```
+
+### 4. Deploy applications
+```bash
+for app in apps/*/; do
+  cd "$app"
+  cp .env.example .env
+  docker compose up -d
+  cd -
+done
+```
+
+### 5. Trust the Root CA on your clients
+- Copy `~/certs/rootCA.pem` to client machines and install as a Trusted Root CA.
+- See `docs/03-security.md` for detailed instructions.
+
+## 🔮 Future Roadmap
+* [x] Implement production-grade DNS (Technitium with built-in HA)
+* [x] Make setup suitable for production environments (Komodo + Traefik + Technitium)
+* [ ] Deploy this home lab setup in the cloud
+* [ ] Implement automated backup strategy (Backrest)
+* [ ] Set up CI/CD pipeline for automated deployments
+* [ ] Test on latest Debian version
 
 ---
 *Created by Omar | 2026*

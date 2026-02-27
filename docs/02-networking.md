@@ -20,7 +20,7 @@ curl -fsSL https://tailscale.com/install.sh | sh
 3. **Admin Console Settings:**
 * Go to the [Tailscale Admin Console](https://login.tailscale.com/admin/dns).
 * **DNS Settings:** Add the server's **Tailscale IP** (`100.x.y.z`) as a Global Nameserver.
-* **Override Local DNS:** Enable this to force clients to use our AdGuard instance.
+* **Override Local DNS:** Enable this to force clients to use our Technitium instance.
 
 ### 1.3 Remote Access (Tailscale Subnet Router)
 
@@ -62,59 +62,77 @@ From a remote network (e.g., Office Wi-Fi or Mobile Data):
 
 
 
-## 2. DNS Resolution (AdGuard Home)
+## 2. DNS Resolution (Technitium DNS Server)
 
-AdGuard Home serves as the network-wide ad blocker and the local DNS resolver for our private domains.
+Technitium DNS Server serves as the local DNS resolver for our private domains, with a built-in web UI for management.
 
 ### 2.1 Deployment
 
-Deployed via Portainer Stack (see `stacks/adguard home`).
+Deployed via Komodo Stack (see `infrastructure/technitium/compose.yaml`).
 
-* **Web Interface:** Port `8081` (Mapped to internal `80`).
+```bash
+cd infrastructure/technitium
+cp .env.example .env
+nano .env   # Set DNS_SERVER_ADMIN_PASSWORD and other values
+docker compose up -d
+```
+
+* **Web Interface:** `https://dns.lab` (via Traefik) or `http://<SERVER-IP>:5380`.
 * **DNS Port:** `53`.
 
 ### 2.2 Configuration
 
-1. Access AdGuard at `http://<SERVER-IP>:8081`.
-2. **Setup Wizard:**
-* **Admin Web Interface:** Listen on interface `eth0` (or `all`), Port `80`.
-* **DNS Server:** Listen on Port `53`.
-
-
-3. **DNS Rewrites:**
-* Go to **Filters** -> **DNS Rewrites**.
-* Add a wildcard rewrite: `*.lab` -> `<SERVER-IP>`.
-*(This directs all traffic for `anything.lab` to our Nginx proxy).*
+1. Access Technitium at `https://dns.lab` or `http://<SERVER-IP>:5380`.
+2. Log in with the admin password set in `.env`.
+3. **DNS Rewrites (Zones):**
+   * Go to **Zones** -> **Add Zone**.
+   * Add a wildcard rewrite: `*.lab` -> `<SERVER-IP>`.
+   *(This directs all traffic for `anything.lab` to our Traefik proxy).*
 
 
 
-## 3. Reverse Proxy (Nginx Proxy Manager)
+## 3. Reverse Proxy (Traefik)
 
-Nginx Proxy Manager (NPM) handles the routing of HTTP requests to the correct container based on the domain name.
+Traefik handles the routing of HTTP/HTTPS requests to the correct container based on the domain name. Services declare their routing rules via Docker labels.
 
 ### 3.1 Deployment
 
-Deployed via Portainer Stack (see `stacks/nginx`).
+Deployed via Komodo Stack (see `infrastructure/traefik/compose.yaml`).
 
-* **Admin Interface:** Port `81`.
+```bash
+cd infrastructure/traefik
+cp .env.example .env
+# Copy your SSL certificates to ./certs/
+cp ~/certs/star_lab.crt ./certs/
+cp ~/certs/star_lab.key ./certs/
+docker compose up -d
+```
+
+* **Dashboard:** `https://traefik.lab`.
 * **HTTP/HTTPS:** Ports `80` and `443`.
 
-### 3.2 Proxy Hosts Configuration
+### 3.2 Service Routing
 
-For every service (e.g., Portainer, Homepage), a **Proxy Host** is created in NPM:
+Each service declares its own routing rules using Traefik labels in its `compose.yaml`. No manual configuration in a central proxy UI is required.
 
-| Domain | Forward Host IP | Forward Port | Scheme |
-| --- | --- | --- | --- |
-| `portainer.lab` | `192.168.1.x` | `9443` | `https` |
-| `home.lab` | `192.168.1.x` | `3001` | `http` |
-| `adguard.lab` | `192.168.1.x` | `8081` | `http` |
+| Domain | Service | Internal Port |
+| --- | --- | --- |
+| `traefik.lab` | Traefik Dashboard | 8080 |
+| `komodo.lab` | Komodo Core | 9120 |
+| `dns.lab` | Technitium DNS | 5380 |
+| `home.lab` | Homepage | 3000 |
+| `uptime.lab` | Uptime Kuma | 3001 |
+| `whoami.lab` | WhoAmI | 80 |
 
-### 3.3 Special Configuration for Portainer
+### 3.3 Adding a New Service
 
-To fix CSRF/Origin errors when accessing Portainer via domain, add this to the **Advanced** tab of the Proxy Host:
+To route a new service through Traefik, add the following labels to its `compose.yaml`:
 
-```nginx
-# Simple SSL Bypass for viewing
-proxy_ssl_verify off;
-proxy_ssl_server_name on;
+```yaml
+labels:
+  - "traefik.enable=true"
+  - "traefik.http.routers.myservice.rule=Host(`myservice.lab`)"
+  - "traefik.http.routers.myservice.entrypoints=websecure"
+  - "traefik.http.routers.myservice.tls=true"
+  - "traefik.http.services.myservice.loadbalancer.server.port=<INTERNAL_PORT>"
 ```

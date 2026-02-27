@@ -7,8 +7,9 @@ This guide documents the implementation of full HTTPS encryption for the local `
 To achieve the "Green Lock" locally, we establish a simplified Public Key Infrastructure (PKI):
 1.  **Root CA:** We create a "Master Authority" and tell our devices to trust it.
 2.  **Leaf Certificate:** We use the Root CA to sign a wildcard certificate (`*.lab`).
-3.  **Termination:** Nginx presents this certificate to clients.
+3.  **Termination:** Traefik presents this certificate to clients.
 
+> **Tip:** You can automate the steps below using `scripts/generate-certs.sh`.
 
 
 ## 2. Generating the Certificates
@@ -78,21 +79,16 @@ openssl x509 -req -in star_lab.csr -CA rootCA.pem -CAkey rootCA.key -CAcreateser
 
 * **Output:** You now have `star_lab.crt` (Public Cert) and `star_lab.key` (Private Key).
 
-## 3. Nginx Configuration
+## 3. Traefik Configuration
 
-We import these files into Nginx Proxy Manager to handle SSL termination.
+Copy the certificate files into the Traefik certs directory so Traefik can serve them.
 
-1. **Import:**
-* Go to **SSL Certificates** -> **Add Custom Certificate**.
-* **Name:** `Wildcard Lab`.
-* **Key:** Upload `star_lab.key`.
-* **Certificate:** Upload `star_lab.crt`.
+```bash
+cp ~/certs/star_lab.crt infrastructure/traefik/certs/
+cp ~/certs/star_lab.key infrastructure/traefik/certs/
+```
 
-
-2. **Apply:**
-* Edit a Proxy Host (e.g., `uptime.lab`).
-* **SSL Tab:** Select "Wildcard Lab".
-* **Settings:** Enable `Force SSL` and `HTTP/2 Support`.
+Traefik picks these up automatically via `infrastructure/traefik/config/certs.yaml` (referenced in the static config). No restart is required if the file provider is watching the directory.
 
 
 
@@ -103,9 +99,9 @@ For the browser to trust the certificate, the **Root CA** must be installed in t
 1. **Transfer:** Copy `rootCA.pem` from the server to the Windows machine.
 2. **Rename:** Change extension to `.crt` (e.g., `rootCA.crt`).
 3. **Install:**
-* Double-click the file -> **Install Certificate**.
-* Store Location: **Local Machine**.
-* Certificate Store: **Trusted Root Certification Authorities**.
+   * Double-click the file -> **Install Certificate**.
+   * Store Location: **Local Machine**.
+   * Certificate Store: **Trusted Root Certification Authorities**.
 
 
 4. **Verify:** Restart the browser and visit `https://uptime.lab`. The connection should be secure.

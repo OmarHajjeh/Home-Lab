@@ -1,0 +1,51 @@
+services:
+  komodo-mongo:
+    image: mongo:7
+    container_name: komodo-mongo
+    restart: unless-stopped
+    volumes:
+      - ./data/mongo:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    networks:
+      - proxy
+
+  komodo-core:
+    image: ghcr.io/moghtech/komodo-core:latest
+    container_name: komodo-core
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      - komodo-mongo
+    ports:
+      - "9120:9120"
+    environment:
+      - KOMODO_HOST=${KOMODO_HOST}
+      - KOMODO_TITLE=${KOMODO_TITLE}
+      - KOMODO_FIRST_SERVER=${KOMODO_FIRST_SERVER}
+      - KOMODO_PASSKEY=${KOMODO_PASSKEY}
+      - KOMODO_DATABASE_URI=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@komodo-mongo:27017
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.komodo.rule=Host(`komodo.lab`)"
+      - "traefik.http.routers.komodo.entrypoints=websecure"
+      - "traefik.http.routers.komodo.tls=true"
+      - "traefik.http.routers.komodo.middlewares=secure-headers@file"
+      - "traefik.http.services.komodo.loadbalancer.server.port=9120"
+    networks:
+      - proxy
+
+  komodo-periphery:
+    image: ghcr.io/moghtech/komodo-periphery:latest
+    container_name: komodo-periphery
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /srv:/srv
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
