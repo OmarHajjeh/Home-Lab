@@ -20,7 +20,7 @@ sudo apt install -y curl wget git nano net-tools
 
 ### 2.1 Fix DNS Stub Conflict (Ubuntu Specific)
 
-Ubuntu's default DNS resolver (`systemd-resolved`) listens on port 53, which conflicts with Technitium DNS Server. We must disable it.
+Ubuntu's default DNS resolver (`systemd-resolved`) listens on port 53, which conflicts with **Technitium DNS Server**. We must disable it before deploying Technitium.
 
 ```bash
 # 1. Create a directory for the configuration override

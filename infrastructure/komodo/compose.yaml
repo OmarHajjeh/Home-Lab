@@ -9,15 +9,15 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
     networks:
-      - proxy
+      - komodo-internal
 
   komodo-core:
     image: ghcr.io/moghtech/komodo-core:latest
     container_name: komodo-core
     restart: unless-stopped
-    env_file: .env
     depends_on:
-      - komodo-mongo
+      komodo-mongo:
+        condition: service_started
     ports:
       - "9120:9120"
     environment:
@@ -25,7 +25,10 @@ services:
       - KOMODO_TITLE=${KOMODO_TITLE}
       - KOMODO_FIRST_SERVER=${KOMODO_FIRST_SERVER}
       - KOMODO_PASSKEY=${KOMODO_PASSKEY}
-      - KOMODO_DATABASE_URI=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@komodo-mongo:27017
+      - KOMODO_DATABASE_URI=${KOMODO_DATABASE_URI}
+      - KOMODO_LOCAL_AUTH=${KOMODO_LOCAL_AUTH}
+      - KOMODO_INIT_ADMIN_USERNAME=${KOMODO_INIT_ADMIN_USERNAME}
+      - KOMODO_INIT_ADMIN_PASSWORD=${KOMODO_INIT_ADMIN_PASSWORD}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.komodo.rule=Host(`komodo.lab`)"
@@ -34,6 +37,7 @@ services:
       - "traefik.http.routers.komodo.middlewares=secure-headers@file"
       - "traefik.http.services.komodo.loadbalancer.server.port=9120"
     networks:
+      - komodo-internal
       - proxy
 
   komodo-periphery:
@@ -44,8 +48,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /srv:/srv
     networks:
+      - komodo-internal
       - proxy
 
 networks:
+  komodo-internal:
+    driver: bridge
   proxy:
     external: true
