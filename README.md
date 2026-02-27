@@ -52,40 +52,13 @@ Home-Lab/
 ├── README.md
 ├── .gitignore
 ├── docs/
-│   ├── 01-installation.md
-│   ├── 02-networking.md
-│   ├── 03-security.md
-│   ├── 04-wifi-adapter.md
-│   └── 05-backup.md
 ├── infrastructure/
 │   ├── traefik/
-│   │   ├── compose.yaml
-│   │   ├── .env.example
-│   │   └── config/
-│   │       ├── traefik.yaml
-│   │       ├── certs.yaml
-│   │       └── dynamic/
-│   │           └── middlewares.yaml
 │   ├── technitium/
-│   │   ├── compose.yaml
-│   │   └── .env.example
 │   └── komodo/
-│       ├── compose.yaml
-│       └── .env.example
 ├── apps/
-│   ├── homepage/
-│   │   ├── compose.yaml
-│   │   └── .env.example
-│   ├── uptime-kuma/
-│   │   ├── compose.yaml
-│   │   └── .env.example
-│   └── whoami/
-│       ├── compose.yaml
-│       └── .env.example
 └── scripts/
-    ├── setup-host.sh
-    ├── generate-certs.sh
-    └── check-wifi.sh
+
 ```
 
 ## 📖 Documentation
@@ -99,51 +72,7 @@ Home-Lab/
 | [05 - Backup](docs/05-backup.md) | Backup strategy |
 | [**06 - Deployment Guide**](docs/06-deployment-guide.md) | **Full step-by-step deployment walkthrough** |
 
-## 🚀 Quick Start
 
-### 1. Prepare the host
-```bash
-bash scripts/setup-host.sh
-```
-
-### 2. Generate SSL certificates
-```bash
-bash scripts/generate-certs.sh
-```
-
-### 3. Deploy infrastructure (Traefik, Technitium, Komodo)
-```bash
-# Traefik
-cd infrastructure/traefik
-cp .env.example .env
-cp ~/certs/star_lab.crt ./certs/
-cp ~/certs/star_lab.key ./certs/
-docker compose up -d
-
-# Technitium DNS
-cd ../technitium
-cp .env.example .env && nano .env
-docker compose up -d
-
-# Komodo
-cd ../komodo
-cp .env.example .env && nano .env
-docker compose up -d
-```
-
-### 4. Deploy applications
-```bash
-for app in apps/*/; do
-  cd "$app"
-  cp .env.example .env
-  docker compose up -d
-  cd -
-done
-```
-
-### 5. Trust the Root CA on your clients
-- Copy `~/certs/rootCA.pem` to client machines and install as a Trusted Root CA.
-- See `docs/03-security.md` for detailed instructions.
 
 ## 🔮 Future Roadmap
 * [x] Implement production-grade DNS (Technitium with built-in HA)
