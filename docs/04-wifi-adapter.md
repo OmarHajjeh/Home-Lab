@@ -47,7 +47,7 @@ sudo mkdir -p /usr/src/rtl8851bu-1.0
 
 # 2. Copy the source files there
 sudo cp -r . /usr/src/rtl8851bu-1.0
-https://uptime.lab/dashboard
+
 # 3. Add, build, and install via DKMS
 sudo dkms add -m rtl8851bu -v 1.0
 sudo dkms build -m rtl8851bu -v 1.0
@@ -59,56 +59,14 @@ Now, every time you get a new kernel, Ubuntu will attempt to rebuild this for yo
 
 
 
-
 #### Step 5: The "Auto-Fix & Health Check" Script
 
-It checks if the interface is up; if not, it checks if the module exists, and if that fails, it re-compiles the driver.
+The check script is located at `scripts/check-wifi.sh`. It checks if the interface is up; if not, it checks if the module exists, and if that fails, it re-compiles the driver.
 
-**Create the script:**
-`nano ~/check_wifi.sh`
-**Paste this code:**
+**Make it executable and schedule it:**
 
 ```bash
-#!/bin/bash
-
-# Configuration
-INTERFACE_PREFIX="wlx"
-MODULE_NAME="8851bu"
-DRIVER_DIR="$HOME/rtl8851bu"
-
-echo "Checking Wi-Fi status for $MODULE_NAME..."
-
-# 1. Check if the interface exists
-if ip link show | grep -q "$INTERFACE_PREFIX"; then
-    echo "[OK] Wi-Fi interface is present."
-else
-    echo "[!] Wi-Fi interface missing. Checking kernel module..."
-    
-    # 2. Check if module is loaded
-    if ! lsmod | grep -q "$MODULE_NAME"; then
-        echo "[!] Module $MODULE_NAME not loaded. Attempting modprobe..."
-        sudo modprobe $MODULE_NAME
-    fi
-
-    # 3. If still missing after modprobe, the kernel likely updated
-    if ! ip link show | grep -q "$INTERFACE_PREFIX"; then
-        echo "[!] Interface still missing. Kernel update detected. Re-installing driver..."
-        cd "$DRIVER_DIR"
-        make clean && make
-        sudo make install
-        sudo depmod -a
-        sudo modprobe $MODULE_NAME
-        echo "[SUCCESS] Driver re-installed for current kernel: $(uname -r)"
-    else
-        echo "[OK] Module was re-loaded successfully."
-    fi
-fi
-
-```
-**Make it executable:**
-```bash
-chmod +x ~/check_wifi.sh
-
+chmod +x scripts/check-wifi.sh
 ```
 
 #### Running it Automatically
@@ -124,7 +82,7 @@ crontab -e
 
 2. **Add this line at the bottom:**
 ```text
-@reboot /home/omar/check_wifi.sh >> /home/omar/wifi_log.txt 2>&1
+@reboot /home/omar/Home-Lab/scripts/check-wifi.sh >> /home/omar/wifi_log.txt 2>&1
 
 ```
 

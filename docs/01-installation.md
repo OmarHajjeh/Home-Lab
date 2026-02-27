@@ -1,6 +1,6 @@
 # 01 - Installation & Base Setup
 
-This guide documents the initial setup of the Ubuntu server, including OS configuration, Docker installation, and the deployment of Portainer for container management.
+This guide documents the initial setup of the Ubuntu server, including OS configuration, Docker installation, and the deployment of Komodo for container management.
 
 ## 1. Prerequisites
 * **OS:** Ubuntu 22.04 LTS (Clean Install).
@@ -20,14 +20,14 @@ sudo apt install -y curl wget git nano net-tools
 
 ### 2.1 Fix DNS Stub Conflict (Ubuntu Specific)
 
-Ubuntu's default DNS resolver (`systemd-resolved`) listens on port 53, which conflicts with AdGuard Home. We must disable it.
+Ubuntu's default DNS resolver (`systemd-resolved`) listens on port 53, which conflicts with Technitium DNS Server. We must disable it.
 
 ```bash
 # 1. Create a directory for the configuration override
 sudo mkdir -p /etc/systemd/resolved.conf.d
 
 # 2. Create the config file
-sudo nano /etc/systemd/resolved.conf.d/adguardhome.conf
+sudo nano /etc/systemd/resolved.conf.d/technitium.conf
 
 ```
 
@@ -69,33 +69,31 @@ sudo usermod -aG docker $USER
 # Activate changes (or logout and login)
 newgrp docker
 
-# Run Docker hello world to verify if everyting work
+# Run Docker hello world to verify if everything work
 docker run hello-world
 
 ```
 
-## 4. Install Portainer (Management UI)
+## 4. Install Komodo (Management UI)
 
-Portainer is deployed as a Docker container to manage the rest of the lab visually.
+Komodo is deployed as a Docker stack to manage the rest of the lab visually.
+See `infrastructure/komodo/compose.yaml` for the full stack definition.
 
 ```bash
-# 1. Create a volume for Portainer data
-docker volume create portainer_data
+# 1. Create the shared proxy network (required before deploying any stack)
+docker network create proxy
 
-# 2. Deploy the Portainer container
-docker run -d \
-  -p 8000:8000 \
-  -p 9000:9000 \
-  -p 9443:9443 \
-  --name portainer \
-  --restart=always \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v portainer_data:/data \
-  portainer/portainer-ce:latest
+# 2. Copy the environment template and fill in your values
+cd infrastructure/komodo
+cp .env.example .env
+nano .env
+
+# 3. Deploy the Komodo stack
+docker compose up -d
 
 ```
 
 ### Verification
 
-* Open your browser and go to: `https://<YOUR-SERVER-IP>:9443`
+* Open your browser and go to: `https://komodo.lab`
 * Create your admin account.

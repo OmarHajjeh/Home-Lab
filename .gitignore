@@ -1,0 +1,20 @@
+# Real environment files (contain secrets)
+.env
+!.env.example
+
+# Runtime data volumes
+**/data/
+
+# SSL certificates and keys
+*.key
+*.pem
+*.crt
+*.csr
+*.srl
+certs/
+
+# OS and editor files
+.DS_Store
+*.swp
+.vscode/
+Thumbs.db

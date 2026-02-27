@@ -1,0 +1,32 @@
+services:
+  technitium:
+    image: technitium/dns-server:latest
+    container_name: technitium
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "5380:5380"
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "853:853/tcp"
+      - "4443:443/tcp"
+    volumes:
+      - ./data:/etc/dns/config
+    environment:
+      - DNS_SERVER_DOMAIN=${DNS_SERVER_DOMAIN}
+      - DNS_SERVER_ADMIN_PASSWORD=${DNS_SERVER_ADMIN_PASSWORD}
+      - DNS_SERVER_PREFER_IPV6=${DNS_SERVER_PREFER_IPV6}
+      - TZ=${TZ}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.technitium.rule=Host(`dns.lab`)"
+      - "traefik.http.routers.technitium.entrypoints=websecure"
+      - "traefik.http.routers.technitium.tls=true"
+      - "traefik.http.routers.technitium.middlewares=secure-headers@file"
+      - "traefik.http.services.technitium.loadbalancer.server.port=5380"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
