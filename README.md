@@ -88,6 +88,17 @@ Home-Lab/
     └── check-wifi.sh
 ```
 
+## 📖 Documentation
+
+| Guide | Description |
+| :--- | :--- |
+| [01 - Installation](docs/01-installation.md) | OS setup, Docker install, DNS stub listener fix |
+| [02 - Networking](docs/02-networking.md) | Tailscale, Traefik, internal DNS |
+| [03 - Security](docs/03-security.md) | SSL certificates, Traefik middlewares |
+| [04 - WiFi Adapter](docs/04-wifi-adapter.md) | USB WiFi adapter setup |
+| [05 - Backup](docs/05-backup.md) | Backup strategy |
+| [**06 - Deployment Guide**](docs/06-deployment-guide.md) | **Full step-by-step deployment walkthrough** |
+
 ## 🚀 Quick Start
 
 ### 1. Prepare the host
