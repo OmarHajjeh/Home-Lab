@@ -31,6 +31,7 @@ services:
       - KOMODO_INIT_ADMIN_PASSWORD=${KOMODO_INIT_ADMIN_PASSWORD}
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
       - "traefik.http.routers.komodo.rule=Host(`komodo.lab`)"
       - "traefik.http.routers.komodo.entrypoints=websecure"
       - "traefik.http.routers.komodo.tls=true"
