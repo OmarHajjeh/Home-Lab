@@ -84,6 +84,5 @@ docker run --rm hello-world
 echo ""
 echo "=== Setup complete! ==="
 echo "Next steps:"
-echo "  1. Run scripts/generate-certs.sh to create SSL certificates."
-echo "  2. Deploy infrastructure services from infrastructure/."
-echo "  3. Deploy application services from apps/."
+echo "  1. Deploy infrastructure services from infrastructure/."
+echo "  2. Deploy application services from apps/."
