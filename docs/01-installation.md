@@ -60,7 +60,7 @@ We use the official installation script for convenience.
 
 ```bash
 # Download and run the install script
-curl -fsSL [https://get.docker.com](https://get.docker.com) -o get-docker.sh
+curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 
 # Add current user to the docker group (avoids using sudo)
